@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Simple Tweets</string>
+    <string name="login_label">Connect to Twitter</string>
+    <string name="title_activity_timeline">TimelineActivity</string>
+    <string name="label_char_counter">140/140</string>
+    <string name="label_message">Your message here:</string>
+    <string name="action_tweet">Tweet</string>
+    <string name="title_activity_compose">Compose</string>
+
+</resources>
