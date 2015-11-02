@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="400dp"
+    android:layout_height="300dp"
+    android:padding="5dp"
+    tools:context="com.codepath.apps.simpletwitterclient.fragments.ReplyDialogFragment"
+    android:layout_gravity="center" android:orientation="vertical"
+    android:weightSum="1">
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:id="@+id/etReplyMessage"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.21"
+        android:maxLength="140"
+        android:lines="5"
+        android:gravity="top|left"
+        android:background="#CDD8DE"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_submit_reply"
+        android:id="@+id/btnSubmitReply"
+        android:layout_gravity="center_horizontal"/>
+</LinearLayout>
