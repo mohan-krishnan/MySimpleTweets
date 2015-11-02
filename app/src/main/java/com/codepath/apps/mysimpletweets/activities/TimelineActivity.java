@@ -2,143 +2,135 @@ package com.codepath.apps.mysimpletweets.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.view.Window;
 
+import com.activeandroid.ActiveAndroid;
+import com.astuetz.PagerSlidingTabStrip;
 import com.codepath.apps.mysimpletweets.R;
-import com.codepath.apps.mysimpletweets.app.TwitterApplication;
-import com.codepath.apps.mysimpletweets.net.TwitterClient;
-import com.codepath.apps.mysimpletweets.adapters.TweetsArrayAdapter;
-import com.codepath.apps.mysimpletweets.models.Tweet;
-import com.codepath.apps.mysimpletweets.util.EndlessScrollListener;
+import com.codepath.apps.mysimpletweets.fragments.HomeTimelineFragment;
+import com.codepath.apps.mysimpletweets.fragments.MentionsTimelineFragment;
+import com.codepath.apps.mysimpletweets.fragments.TweetsListFragment;
 import com.codepath.apps.mysimpletweets.util.Utils;
-import com.loopj.android.http.JsonHttpResponseHandler;
-
-import org.apache.http.Header;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 
-public class TimelineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity implements TweetsListFragment.DetailedViewRequestListener, TweetsListFragment.ProgressBarListener {
+
+    TweetsPagerAdapter tweetsPagerAdapter;
+    ViewPager vpPager;
+
+    HomeTimelineFragment homeTimelineFragment;
+    MentionsTimelineFragment mentionsTimelineFragment;
+
     // We need this key for response, to refresh home timeline
     public static final int TWEET_COMPOSE_ID = 10;
-    private TwitterClient client;
-    private ArrayList<Tweet> tweets;
-    private TweetsArrayAdapter aTweets;
-    private ListView lvTweets;
-    private SwipeRefreshLayout swipeContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
-        client = TwitterApplication.getRestClient();
-        // Find the listview
-        tweets = new ArrayList<>();
-        aTweets = new TweetsArrayAdapter(this, tweets);
-        lvTweets = (ListView) findViewById(R.id.lvTweets);
 
-        // Connect adapter to list view
-        lvTweets.setAdapter(aTweets);
+        ActiveAndroid.initialize(this);
 
-        populateTimeline(0);
-        // Swipe Container for refresh
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        /* Did not work out
+        ActionBar bar = getActionBar();
+        bar.setBackgroundDrawable(new ColorDrawable(Color.rgb(94,176,237)));
+        bar.setDisplayShowTitleEnabled(false);
+        bar.setDisplayShowTitleEnabled(true); */
 
-        // Endless Scroll Listener
-        setupEndlessScrollListener();
+        homeTimelineFragment = new HomeTimelineFragment();
+        mentionsTimelineFragment = new MentionsTimelineFragment();
 
-        // Swipe Refresh Listener
-        setupSwipeRefreshListener();
+        // Get the viewpager
+        vpPager = (ViewPager) findViewById(R.id.viewpager);
 
+        // Set the viewpager adapter to the pager
+        tweetsPagerAdapter = new TweetsPagerAdapter(getSupportFragmentManager());
+        vpPager.setAdapter(tweetsPagerAdapter);
+
+
+        // Find the pager sliding tabstrip
+        PagerSlidingTabStrip tabStrip = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+
+        // Attach the tabscript to the viewpager
+        tabStrip.setViewPager(vpPager);
     }
 
-    // Setup Endless Scroll for List View
-    public void setupEndlessScrollListener() {
-        // Endless scrolling
-        lvTweets.setOnScrollListener(new EndlessScrollListener() {
-            // Triggered only when new data needs to be appended to the list
-            // Add whatever code is needed to append new items to your AdapterView
-            @Override
-            public void onLoadMore(int totalItemCount) {
-                populateTimeline(getNextMaxId(totalItemCount));
-            }
-        });
-    }
-
-    // Setup on Swipe Refresh Listener
-    public void setupSwipeRefreshListener() {
-        // Setup refresh listener which triggers new data loading
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Clear current list and populate latest tweets,
-                populateTimeline(0);
-                // Now we call setRefreshing(false) to signal refresh has finished
-                swipeContainer.setRefreshing(false);
-
-            }
-        });
-        // Configure the refreshing colors
-        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-    }
-
-    // Return 0 if list is empty, otherwise the smallest id - 1 in the list
-    public long getNextMaxId(int totalItemCount) {
-        if (tweets.isEmpty()) {
-            return 0;
-        } else {
-            return tweets.get(totalItemCount-1).getUid() - 1;
-        }
-    }
-
-    private void populateTimeline(long page) {
-        // First load or re-load
-        if (page == 0) {
-            // Remove everything from the list
-            aTweets.clear();
-        }
-        // Get the tweets
-        client.getHomeTimeline(page, new JsonHttpResponseHandler() {
-
-            //SUCCESS
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                // Deserialize JSON and add them to adapter
-                aTweets.addAll(Tweet.fromJSONArray(json, false));
-            }
-
-            //FAILURE
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable,
-                                  JSONObject jsonObject) {
-                Log.d("DEBUG", "Failed to fetch data : " + statusCode + " : " + jsonObject.toString(), throwable);
-                Toast.makeText(TimelineActivity.this, "Failed to fetch data : " + statusCode + " : " + jsonObject.toString(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onUserException(Throwable error) {
-                Log.d("DEBUG", "User exception : " + error.getMessage(), error);
-                Toast.makeText(TimelineActivity.this, "User exception : " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_timeline, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((resultCode == RESULT_OK) && (requestCode == TWEET_COMPOSE_ID)) {
+            homeTimelineFragment.reloadTimeline();
+            mentionsTimelineFragment.reloadTimeline();
+        }
+    }
+
+    // return the order of fragments in viewpager
+    public class TweetsPagerAdapter extends FragmentPagerAdapter {
+
+        final int PAGE_COUNT = 2;
+        private String tabTitles[] = {"Home", "Mentions"};
+
+        public TweetsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        // The order and creation of fragments within the pager
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                return homeTimelineFragment;
+            } else if (position == 1) {
+                return mentionsTimelineFragment;
+            }
+            else {
+                return null;
+            }
+        }
+
+        // Return the tab title
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return tabTitles[position];
+        }
+
+        // How many fragments are to swipe between?
+        @Override
+        public int getCount() {
+            return tabTitles.length;
+        }
+    }
+
+    // Profile View menu item (see onClick)
+    public void onProfileView(MenuItem mi) {
+        if (Utils.isNetworkAvailable(this)) {
+            // Launch the profile view
+            Intent i = new Intent(this, ProfileActivity.class);
+            i.putExtra("screen_name", "");
+            startActivity(i);
+        } else {
+            // Show NO INTERNET message
+            Utils.showNoInternet(this);
+        }
     }
 
     // Compose menu item (see onClick)
@@ -153,12 +145,24 @@ public class TimelineActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((resultCode == RESULT_OK) && (requestCode == TWEET_COMPOSE_ID)) {
-            populateTimeline(0);
+    // This request is made by the fragment who displays the list
+    // and it is called when an item is clicked on.
+    public void onDetailedViewRequest(long id) {
+        if (Utils.isNetworkAvailable(this)) {
+            Intent i = new Intent(this, DetailedViewActivity.class);
+            i.putExtra("postId", id);
+            startActivity(i);
+        } else {
+            // Show NO INTERNET message
+            Utils.showNoInternet(this);
         }
     }
 
+    public void showProgressBar() {
+        setProgressBarIndeterminateVisibility(true);
+    }
 
+    public void hideProgressBar() {
+        setProgressBarIndeterminateVisibility(false);
+    }
 }

@@ -31,7 +31,7 @@ public class ComposeActivity extends AppCompatActivity {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            tvCharCounter.setText(String.valueOf(140 - etMessage.getText().toString().length())+"/140");
+            tvCharCounter.setText(String.valueOf(140 - etMessage.getText().toString().length()) + "/140");
         }
 
         @Override

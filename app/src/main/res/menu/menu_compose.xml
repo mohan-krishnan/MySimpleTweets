@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.codepath.apps.mysimpletweets.activities.ComposeActivity">
+    tools:context="com.codepath.apps.simpletwitterclient.ComposeActivity">
     <item android:id="@+id/action_tweet" android:title="@string/action_tweet"
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/icon_tweet_bird"

@@ -56,6 +56,7 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
             viewHolder.tvCreatedAt = (TextView) convertView.findViewById(R.id.tvCreatedAt);
             viewHolder.tvRetweets = (TextView) convertView.findViewById(R.id.tvRetweets);
             viewHolder.tvFavorites = (TextView) convertView.findViewById(R.id.tvFavorites);
+            viewHolder.ivDisplayImage = (ImageView) convertView.findViewById(R.id.ivDisplayImage);
 
             convertView.setTag(viewHolder);
         }
@@ -86,7 +87,16 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
                 .build();
 
         Picasso.with(getContext()).load(tweet.getUser().getProfileImageUrl()).fit().transform(transformation).into(viewHolder.ivProfileImage);
-
+        viewHolder.ivDisplayImage.setImageResource(0);
+        viewHolder.ivDisplayImage.setImageDrawable(null);
+        viewHolder.ivDisplayImage.setMinimumHeight(0);
+        viewHolder.ivDisplayImage.setMinimumWidth(0);
+        if (tweet.getImage() != null) {
+            viewHolder.ivDisplayImage.setMinimumHeight(tweet.getImage().get(0).getHeight());
+            viewHolder.ivDisplayImage.setMinimumWidth(tweet.getImage().get(0).getWidth());
+            //Toast.makeText(getBaseContext(), tweet.getImage().get(0).getUrl(), Toast.LENGTH_SHORT);
+            Picasso.with(getContext()).load(tweet.getImage().get(0).getUrl()).into(viewHolder.ivDisplayImage);
+        }
         // Return the view to be inserted into the list
         return convertView;
     }
@@ -98,5 +108,6 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
         TextView tvCreatedAt;
         TextView tvRetweets;
         TextView tvFavorites;
+        ImageView ivDisplayImage;
     }
 }

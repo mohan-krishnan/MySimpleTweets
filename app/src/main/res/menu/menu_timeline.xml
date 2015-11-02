@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.codepath.apps.mysimpletweets.activities.TimelineActivity">
+    tools:context="com.codepath.apps.simpletwitterclient.TimelineActivity">
 
     <item
         android:id="@+id/action_compose"
@@ -9,5 +9,12 @@
         app:showAsAction="ifRoom"
         android:title="Compose"
         android:onClick="onCompose"/>
+
+    <item
+        android:id="@+id/action_profile"
+        android:icon="@drawable/ic_profile"
+        app:showAsAction="ifRoom"
+        android:title="Profile"
+        android:onClick="onProfileView"/>
 
 </menu>

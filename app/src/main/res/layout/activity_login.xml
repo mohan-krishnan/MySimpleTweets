@@ -14,10 +14,6 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
         android:onClick="loginToRest"
-        android:text="@string/login_label"
-        android:elegantTextHeight="false"
-        android:background="#094bf1"
-        android:textColor="#fdfafa"
-        style="@style/Widget.AppCompat.Button.Colored" />
+        android:text="@string/login_label" />
 
 </RelativeLayout>
